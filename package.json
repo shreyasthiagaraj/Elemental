@@ -1,0 +1,25 @@
+{
+  "name": "zombie-shooter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shreyasthiagaraj/dead-zone.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/shreyasthiagaraj/dead-zone/issues"
+  },
+  "homepage": "https://github.com/shreyasthiagaraj/dead-zone#readme",
+  "dependencies": {
+    "ws": "^8.20.0"
+  }
+}
