@@ -44,7 +44,7 @@ canvas#game { display:block; position:fixed; top:0; left:0; z-index:1; }
 /* Ability cooldown icons */
 #ability-bar { position:fixed; z-index:25; display:flex; gap:8px; }
 body.desktop #ability-bar { bottom:max(16px,env(safe-area-inset-bottom)); left:max(16px,env(safe-area-inset-left)); }
-body.mobile #ability-bar { bottom:max(72px,calc(env(safe-area-inset-bottom)+64px)); left:50%; transform:translateX(-50%); }
+body.mobile #ability-bar { bottom:max(70px,calc(env(safe-area-inset-bottom)+62px)); left:max(12px,env(safe-area-inset-left)); }
 .ab-btn { width:50px; height:50px; border-radius:12px; border:2px solid #333; background:rgba(0,0,0,0.75);
   display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
   -webkit-tap-highlight-color:transparent; transition:all 0.15s; position:relative; overflow:hidden; }
@@ -80,14 +80,14 @@ body.mobile .el-btn { width:38px; height:38px; font-size:16px; }
   animation:avatar-pulse 1.2s infinite; }
 @keyframes avatar-pulse { 0%,100%{box-shadow:0 0 8px rgba(255,255,255,0.2)} 50%{box-shadow:0 0 24px rgba(255,255,255,0.5)} }
 body.desktop #btn-avatar { bottom:max(16px,env(safe-area-inset-bottom)); right:max(16px,env(safe-area-inset-right)); }
-body.mobile #btn-avatar { bottom:max(72px,calc(env(safe-area-inset-bottom)+64px)); right:max(14px,env(safe-area-inset-right)); }
+body.mobile #btn-avatar { bottom:max(70px,calc(env(safe-area-inset-bottom)+62px)); right:max(14px,env(safe-area-inset-right)); }
 
 /* Dash button (mobile only) */
 #btn-dash { position:fixed; z-index:25; width:44px; height:44px; border-radius:50%;
   border:2px solid #4af; background:rgba(0,0,0,0.7); color:#4af; font-size:9px; font-weight:700;
   font-family:inherit; display:none; align-items:center; justify-content:center; cursor:pointer;
   -webkit-tap-highlight-color:transparent; transition:all 0.15s; }
-body.mobile #btn-dash { display:flex; bottom:max(130px,calc(env(safe-area-inset-bottom)+122px)); right:max(14px,env(safe-area-inset-right)); }
+body.mobile #btn-dash { display:flex; bottom:max(130px,calc(env(safe-area-inset-bottom)+122px)); right:max(68px,calc(env(safe-area-inset-right)+60px)); }
 #btn-dash.cooldown { border-color:#222; color:#333; }
 
 /* Joystick zones */
@@ -227,7 +227,10 @@ function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 function rnd(lo, hi) { return lo + Math.random() * (hi - lo); }
 function angleTo(a, b) { return Math.atan2(b.y - a.y, b.x - a.x); }
 function angleDiff(a, b) { let d = ((b - a + PI) % PI2 + PI2) % PI2 - PI; return d; }
-function hexAlpha(hex, a) { return hex + Math.max(0, Math.min(255, Math.floor(a * 255))).toString(16).padStart(2, '0'); }
+function hexAlpha(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+clamp(a,0,1).toFixed(3)+')';
+}
 function shade(hex, amt) {
   let r = parseInt(hex.slice(1,3),16)+amt, g = parseInt(hex.slice(3,5),16)+amt, b = parseInt(hex.slice(5,7),16)+amt;
   return '#'+[r,g,b].map(c=>clamp(c,0,255).toString(16).padStart(2,'0')).join('');
@@ -971,7 +974,7 @@ function updatePlayer() {
         e.burn = 90;
       }
     }
-    effects.push({ type:'dot', x:P.x, y:P.y, r:15, life:40, maxLife:40, col:'#ff440066' });
+    effects.push({ type:'dot', x:P.x, y:P.y, r:15, life:40, maxLife:40, col:'rgba(255,68,0,0.4)' });
   }
   // Regular dash
   else if (P.dashing) {
@@ -1394,7 +1397,7 @@ function render() {
 
 function drawArena() {
   // Grid
-  X.strokeStyle = 'rgba(255,255,255,0.025)';
+  X.strokeStyle = 'rgba(255,255,255,0.05)';
   X.lineWidth = 1;
   const gs = 80;
   const sX = Math.floor((cam.x-W/2)/gs)*gs, sY = Math.floor((cam.y-H/2)/gs)*gs;
@@ -1461,10 +1464,9 @@ function drawPlayer() {
   // Element ring
   X.beginPath(); X.arc(P.x,P.y,P.radius,0,PI2);
   if (avatarActive) {
-    // Rainbow ring
-    const ag = X.createConicGradient(ticks*0.05, P.x, P.y);
-    ag.addColorStop(0,'#ff5533'); ag.addColorStop(0.25,'#33aaff'); ag.addColorStop(0.5,'#77aa33'); ag.addColorStop(0.75,'#ccddee'); ag.addColorStop(1,'#ff5533');
-    X.strokeStyle = ag;
+    // Rainbow ring — use cycling color since ConicGradient has poor support
+    const cols = ['#ff5533','#33aaff','#77aa33','#ccddee'];
+    X.strokeStyle = cols[Math.floor(ticks*0.1) % 4];
   } else {
     X.strokeStyle = el.color;
   }
@@ -1503,7 +1505,7 @@ function drawEnemies() {
     // Elite glow
     if (e.elite) {
       const eg = X.createRadialGradient(e.x,e.y,0,e.x,e.y,e.radius*2.5);
-      eg.addColorStop(0, e.color+'33'); eg.addColorStop(1,'transparent');
+      eg.addColorStop(0, hexAlpha(e.color, 0.2)); eg.addColorStop(1,'transparent');
       X.fillStyle = eg; X.beginPath(); X.arc(e.x,e.y,e.radius*2.5,0,PI2); X.fill();
     }
 
@@ -1754,16 +1756,18 @@ function titleRender(ts) {
 // ================================================================
 var lastT = -1, accum = 0;
 const TICK = 1000/60;
-var loopCount = 0;
 function loop(ts) {
   requestAnimationFrame(loop);
-  loopCount++;
-  if (lastT < 0) { lastT = ts; return; }
-  const dt = Math.min(ts - lastT, 100);
-  lastT = ts;
-  accum += dt;
-  while (accum >= TICK) { update(); accum -= TICK; }
-  render();
+  try {
+    if (lastT < 0) { lastT = ts; return; }
+    const dt = Math.min(ts - lastT, 100);
+    lastT = ts;
+    accum += dt;
+    let steps = 0;
+    while (accum >= TICK && steps < 5) { update(); accum -= TICK; steps++; }
+    if (steps >= 5) accum = 0; // prevent spiral of death
+    render();
+  } catch(e) { console.error('Loop error:', e); }
 }
 
 // Show high score
