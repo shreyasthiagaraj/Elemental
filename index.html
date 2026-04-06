@@ -1371,6 +1371,7 @@ function updateHUD() {
 // ================================================================
 function render() {
   X.clearRect(0,0,W,H);
+  if (!P) return; // Not yet initialized
 
   // Camera
   cam.x += (P.x-cam.x)*0.08; cam.y += (P.y-cam.y)*0.08;
