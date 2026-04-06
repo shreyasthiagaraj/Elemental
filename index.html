@@ -338,6 +338,11 @@ function initGame() {
   cooldowns = {};
   EL_KEYS.forEach(e => { cooldowns[e+'_1'] = 0; cooldowns[e+'_2'] = 0; });
   ticks = 0;
+  // Reset element UI
+  document.querySelectorAll('.el-btn').forEach(b => { b.classList.remove('active'); b.style.borderColor = '#2a2a2a'; });
+  const elBtn = document.getElementById('el-' + P.el);
+  if (elBtn) { elBtn.classList.add('active'); elBtn.style.borderColor = EL[P.el].color; }
+  updateAbilityLabels();
   nextWave();
 }
 
@@ -810,7 +815,6 @@ function updateAbilityLabels() {
   document.getElementById('ab1-label').textContent = el.ab1.name.split(' ').map(w=>w[0]).join('');
   document.getElementById('ab2-label').textContent = el.ab2.name.split(' ').map(w=>w[0]).join('');
 }
-updateAbilityLabels();
 
 // ================================================================
 //  UPGRADE SYSTEM
